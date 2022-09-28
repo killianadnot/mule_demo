@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="1ce46be9-44d3-4e68-9503-2d0b6ab45779" >
+		<http:listener-connection host="127.0.0.1" port="3000" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="b63b8a92-114d-4d48-bbde-ad5b1818dc2c" >
+		<db:my-sql-connection host="127.0.0.1" port="3306" user="root" password="root" database="test" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="8e59d9b7-1b7b-4af7-8f48-2ad99b3d3c4a" >
+		<http:listener-connection host="0.0.0.0" port="3000" />
+	</http:listener-config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="505caf01-7099-4deb-a95b-e797e18b90ad" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="test" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config2" doc:name="HTTP Listener config" doc:id="061dd94c-6363-461c-be17-95b5e0686872" >
+		<http:listener-connection host="127.0.0.1" port="3000" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_config3" doc:name="HTTP Listener config" doc:id="ae163ef3-b6a7-496b-8c81-1be3af10de4c" >
+		<http:listener-connection host="127.0.0.1" port="3001" />
+	</http:listener-config>
+	<http:listener-config name="ListenerConfig" doc:name="HTTP Listener config" doc:id="2a15f013-72ec-45ed-b5d4-077812bd4efe" >
+		<http:listener-connection host="localhost" port="3000" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_8081" doc:name="HTTP Listener config" doc:id="2f479bbf-13a8-4efa-839e-7e31190f951e" >
+		<http:listener-connection host="127.0.0.1" port="8081" />
+	</http:listener-config>
+	<flow name="muleappdbconnectorFlow" doc:id="624872b4-d924-4681-8b16-5e50895a495d" >
+		<http:listener doc:name="Listener" doc:id="e2a7a3ac-920f-4d33-be95-784f80a084b9" config-ref="HTTP_Listener_8081" path="/" outputMimeType="application/json" allowedMethods="GET"/>
+		<db:select doc:name="Select" doc:id="1cc42852-302a-4b8c-bfff-78f80562d0cb" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from contrats where nameContrat = :nameContrat]]></db:sql>
+			<db:input-parameters ><![CDATA[#['nameContrat': payload.nameContrat]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="660f71a4-93fb-400a-a248-6f3ebbb74b68" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

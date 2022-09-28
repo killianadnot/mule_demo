@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_8082" doc:name="HTTP Listener config" doc:id="161fb3ea-fd05-4fc3-88e1-a567bc89eb32" >
+		<http:listener-connection host="127.0.0.1" port="8082" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="6d6b6485-193b-4599-a1e8-2cd3447033b8" >
+		<http:listener-connection host="127.0.0.1" port="3000" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="807dfd8e-6ea7-4b5f-a7f9-2bd7a8b82e57" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="ad809899-56ea-4f1e-9e15-bc95174a7d4d" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="test" />
+	</db:config>
+	<flow name="muleappwithlocalconditionFlow" doc:id="6f10b4d4-800d-4770-8ed6-f60421ce116c" >
+		<http:listener doc:name="Listener" doc:id="68bed8a1-d061-4e1c-85eb-e4ca033bef1a" config-ref="HTTP_Listener_8082" path="/"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="34fdba11-ef05-4222-a6f3-10de81dd1526" variableName="SAVED_PAYLOAD" mimeType="application/json"/>
+		<file:read doc:name="Read" doc:id="b6963eea-0542-4831-ae5b-a931c48f1cdf" config-ref="File_Config" path='#["C:\\Users\\killian.adnot\\AnypointStudio\\studio-workspace\\muleappwithlocalcondition\\src\\main\\resources\\" ++ payload.nameContrat ++ ".txt" as String]'/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a9dd6b24-d233-4936-82da-d0ce78859476" >
+				<db:select doc:name="Select" doc:id="a2df3175-e64f-49f3-8b50-085195d2c69c" config-ref="Database_Config">
+					<db:sql><![CDATA[select * from contrats where nameContrat = :nameContrat]]></db:sql>
+					<db:input-parameters><![CDATA[#[{'nameContrat' : vars.SAVED_PAYLOAD.nameContrat}]]]></db:input-parameters>
+				</db:select>
+				<ee:transform doc:name="Transform Message" doc:id="e7cf075d-fb85-4356-996f-90e8f16ea2f7">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

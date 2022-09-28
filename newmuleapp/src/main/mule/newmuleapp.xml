@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_8080" doc:name="HTTP Listener config" doc:id="653ca762-6338-47f3-aedb-0819d7210651" >
+		<http:listener-connection host="127.0.0.1" port="3000" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="d2fb5e45-9fd4-4847-908c-9f01a39d1c6d" >
+		<http:request-connection protocol="HTTPS" />
+	</http:request-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="e4315ca2-5d4e-4f29-8e08-ede9de6b5d30" />
+	<flow name="newmuleappFlow" doc:id="30805b42-1f80-4ab9-9b73-cdd5da09bb6b" >
+		<http:listener doc:name="Listener" doc:id="2da87683-9922-4ef0-9ea1-79ac22c947d9" config-ref="HTTP_Listener_8080" path="/" allowedMethods="GET" outputMimeType='application/json;msg="";id=""'>
+			<http:response statusCode="200" />
+			<http:error-response statusCode="400" />
+		</http:listener>
+		<ee:transform doc:name="Transform Message" doc:id="f879f610-b2ec-4e20-bc77-4d4c3db1f2fc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[{
+	"id": payload.id,
+	"msg": payload.msg ++ "modified",
+	"nameContrat": payload.nameContrat,
+	"fileName": "contrat.txt"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:read doc:id="a9f9e1ea-004d-416d-8cd5-a2dffe9c7896" path='#["C:\\Users\\killian.adnot\\AnypointStudio\\studio-workspace\\newmuleapp\\src\\main\\resources\\" ++ payload.nameContrat ++ ".txt" as String]' config-ref="File_Config"/>
+	</flow>
+</mule>
